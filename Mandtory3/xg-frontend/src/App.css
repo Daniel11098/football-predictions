@@ -1,0 +1,487 @@
+:root {
+  --paper: #e7ebe5;
+  --ink: #14201a;
+  --muted: #55645c;
+  --rule: #c3ccc4;
+  --pine: #1d4a37;
+  --pine-stripe: #235641;
+  --chalk: #f1eee3;
+  --amber: #f5b83d;
+  --sky: #8ccff0;
+  --coral: #e5584b;
+  --focus: #0b6e4f;
+  --display: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif;
+  --body: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--body);
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.app {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 28px 24px 56px;
+}
+
+.masthead h1 {
+  margin: 0;
+  font: 800 clamp(40px, 6vw, 64px) / 0.95 var(--display);
+  letter-spacing: 0.01em;
+}
+
+.masthead p {
+  max-width: 52ch;
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  margin-top: 28px;
+}
+
+/* Små skjermer: banen først, så resultatet, så skjemaet, så utregnede verdier. */
+.board,
+.side {
+  display: contents;
+}
+.pitch-block {
+  order: 1;
+}
+.result {
+  order: 2;
+}
+.form-block {
+  order: 3;
+}
+.derived-block {
+  order: 4;
+}
+
+@media (min-width: 980px) {
+  .layout {
+    grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+    gap: 48px;
+    align-items: start;
+  }
+  .board,
+  .side {
+    display: block;
+  }
+}
+
+/* Bane */
+
+.pitch {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 80vh;
+  border-radius: 6px;
+  touch-action: none;
+  user-select: none;
+}
+
+.pitch-grass {
+  fill: var(--pine);
+}
+.pitch-stripe {
+  fill: var(--pine-stripe);
+}
+.pitch-lines rect,
+.pitch-lines path {
+  fill: none;
+  stroke: var(--chalk);
+  stroke-width: 0.35;
+  stroke-linejoin: round;
+}
+.pitch-lines .pitch-goal {
+  fill: rgba(241, 238, 227, 0.18);
+  stroke-width: 0.5;
+}
+.pitch-dot {
+  fill: var(--chalk);
+  stroke: none;
+}
+.pitch-hit {
+  fill: transparent;
+  cursor: crosshair;
+}
+.pitch-triangle {
+  fill: var(--chalk);
+  fill-opacity: 0.13;
+  pointer-events: none;
+}
+.pitch-sight {
+  stroke: var(--chalk);
+  stroke-opacity: 0.55;
+  stroke-width: 0.25;
+  stroke-dasharray: 1 1;
+  pointer-events: none;
+}
+.pitch-ring {
+  fill: none;
+  stroke: var(--chalk);
+  stroke-opacity: 0.35;
+  stroke-width: 0.2;
+  stroke-dasharray: 0.8 0.8;
+  pointer-events: none;
+}
+.pitch-caption {
+  fill: var(--chalk);
+  fill-opacity: 0.6;
+  font: 500 2.2px var(--body);
+  pointer-events: none;
+}
+
+.marker {
+  cursor: grab;
+}
+.marker:active {
+  cursor: grabbing;
+}
+.marker-hit {
+  fill: transparent;
+}
+.marker-body {
+  stroke: var(--pine);
+  stroke-width: 0.35;
+}
+.marker-shooter .marker-body {
+  fill: var(--amber);
+}
+.marker-ball {
+  fill: var(--pine);
+  pointer-events: none;
+}
+.marker-keeper .marker-body {
+  fill: var(--sky);
+}
+.marker-letter {
+  fill: var(--pine);
+  font: 700 2px var(--body);
+  pointer-events: none;
+}
+.marker-opponent .marker-body {
+  fill: var(--coral);
+  fill-opacity: 0.75;
+}
+.marker-opponent.is-blocking .marker-body {
+  fill-opacity: 1;
+  stroke: var(--chalk);
+  stroke-width: 0.5;
+}
+.marker:focus-visible {
+  outline: none;
+}
+.marker:focus-visible .marker-body {
+  stroke: var(--chalk);
+  stroke-width: 0.7;
+}
+
+/* Verktøy under banen */
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--ink);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  font: 500 15px var(--body);
+  cursor: pointer;
+}
+.seg[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+.seg-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.seg-shooter .seg-dot {
+  background: var(--amber);
+}
+.seg-keeper .seg-dot {
+  background: var(--sky);
+}
+.seg-opponent .seg-dot {
+  background: var(--coral);
+}
+
+.link-button {
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: 500 15px var(--body);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.link-button:disabled {
+  color: var(--muted);
+  text-decoration: none;
+  cursor: default;
+}
+
+.hint {
+  max-width: 62ch;
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Seksjoner */
+
+.section {
+  padding: 22px 0 24px;
+  border-top: 1px solid var(--rule);
+}
+.board .section {
+  margin-top: 24px;
+}
+.section h2,
+.result h2 {
+  margin: 0 0 14px;
+  font: 800 26px / 1 var(--display);
+  letter-spacing: 0.01em;
+}
+
+/* Resultat */
+
+.result {
+  padding-bottom: 24px;
+}
+.result-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px 28px;
+  align-items: center;
+  transition: opacity 0.15s;
+}
+.result-body.is-stale {
+  opacity: 0.5;
+}
+
+.waffle {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
+  width: 200px;
+  flex: none;
+}
+.dot {
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #cfd7d0;
+  transition: background-color 0.12s;
+}
+.dot.is-goal {
+  background: var(--pine);
+}
+
+.result-text {
+  flex: 1 1 140px;
+}
+.xg-number {
+  margin: 0;
+  font: 800 clamp(72px, 9vw, 108px) / 0.85 var(--display);
+}
+.xg-explain {
+  margin: 10px 0 0;
+  max-width: 28ch;
+}
+.verdict {
+  margin: 10px 0 0;
+  font-weight: 600;
+}
+
+.notice {
+  margin: 0 0 14px;
+  padding: 10px 14px;
+  border-left: 4px solid var(--coral);
+  background: #f3dedb;
+  font-size: 14px;
+}
+.notice-soft {
+  border-left-color: var(--amber);
+  background: #f4ead2;
+}
+
+/* Skjema */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 16px;
+}
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.field label {
+  font-size: 14px;
+  font-weight: 600;
+}
+.field select,
+.field input[type='number'],
+.field input[type='text'] {
+  min-height: 42px;
+  padding: 0 10px;
+  border: 1px solid #8e9b93;
+  border-radius: 4px;
+  background: #f6f8f4;
+  color: var(--ink);
+  font: 400 15px var(--body);
+}
+.field-range {
+  margin-bottom: 16px;
+}
+.field-range output {
+  margin-left: 6px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.field-range input[type='range'] {
+  width: 100%;
+  accent-color: var(--pine);
+}
+
+.toggles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 16px;
+  margin: 20px 0 0;
+  padding: 0;
+  border: 0;
+}
+@media (max-width: 480px) {
+  .toggles {
+    grid-template-columns: 1fr;
+  }
+}
+.toggles legend {
+  margin-bottom: 8px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  font-size: 15px;
+  cursor: pointer;
+}
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+}
+.toggle-box {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  background: #f6f8f4;
+}
+.toggle input:checked + .toggle-box {
+  background: var(--pine);
+  border-color: var(--pine);
+  box-shadow: inset 0 0 0 3px #f6f8f4;
+}
+.toggle input:focus-visible + .toggle-box {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Utregnede verdier */
+
+.derived {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  margin: 0;
+  max-width: 520px;
+}
+.derived-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: 15px;
+}
+.derived dt {
+  color: var(--muted);
+}
+.derived dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.footer {
+  margin-top: 48px;
+  padding-top: 16px;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
