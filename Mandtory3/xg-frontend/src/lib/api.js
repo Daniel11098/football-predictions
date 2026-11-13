@@ -9,6 +9,20 @@ export async function fetchOptions() {
   return res.json()
 }
 
+export async function fetchResults() {
+  const res = await fetch(`${BASE}/results`)
+  if (!res.ok) throw new ApiError(`results ${res.status}`)
+  return res.json()
+}
+
+// 404 betyr at importance-dataene ikke er lagt inn i model_results.json ennå.
+export async function fetchImportance() {
+  const res = await fetch(`${BASE}/importance`)
+  if (res.status === 404) return null
+  if (!res.ok) throw new ApiError(`importance ${res.status}`)
+  return res.json()
+}
+
 function messageFrom(body, status) {
   if (body && body.message) {
     if (typeof body.message === 'string') return body.message

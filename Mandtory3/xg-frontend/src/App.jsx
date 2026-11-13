@@ -3,7 +3,9 @@ import Pitch from './components/Pitch.jsx'
 import Result from './components/Result.jsx'
 import Derived from './components/Derived.jsx'
 import ShotForm from './components/ShotForm.jsx'
-import { fetchOptions, predict } from './lib/api.js'
+import ThresholdPanel from './components/ThresholdPanel.jsx'
+import Importance from './components/Importance.jsx'
+import { fetchOptions, fetchResults, predict } from './lib/api.js'
 import { DEFAULT_FORM, FALLBACK_OPTIONS } from './lib/constants.js'
 import { buildParams, opponentFeatures, shotGeometry } from './lib/features.js'
 
@@ -25,6 +27,9 @@ export default function App() {
     { x: 109, y: 44.5 },
   ])
   const [tool, setTool] = useState('shooter')
+
+  const [threshold, setThreshold] = useState(0.25)
+  const [results, setResults] = useState(null)
 
   const [result, setResult] = useState(null)
   const [status, setStatus] = useState('loading')
@@ -56,13 +61,28 @@ export default function App() {
     }
   }, [])
 
+  // Testresultater og terskeltabell fra backend. Terskelen starter på modellens standardverdi.
+  useEffect(() => {
+    fetchResults()
+      .then((data) => {
+        setResults(data)
+        setThreshold(data.meta.default_threshold)
+      })
+      .catch(() => setResults(null))
+  }, [])
+
   const onField = (key, value) => setForm((f) => ({ ...f, [key]: value }))
 
   const geometry = useMemo(() => shotGeometry(shooter, keeper), [shooter, keeper])
   const opponentInfo = useMemo(() => opponentFeatures(shooter, opponents), [shooter, opponents])
-  const params = useMemo(
+  const shotParams = useMemo(
     () => buildParams(form, shooter, keeper, opponents),
     [form, shooter, keeper, opponents],
+  )
+  const params = useMemo(() => ({ ...shotParams, threshold }), [shotParams, threshold])
+  const testRow = useMemo(
+    () => results?.threshold_table.test.find((r) => Math.abs(r.threshold - threshold) < 0.005) ?? null,
+    [results, threshold],
   )
 
   // Kall API-et mens du drar og endrer. Ventetiden hindrer at hvert piksel blir et kall.
@@ -148,13 +168,16 @@ export default function App() {
         </div>
 
         <div className="side">
-          <Result result={result} status={status} error={error} />
+          <Result result={result} status={status} error={error} threshold={threshold} row={testRow} />
           <ShotForm form={form} options={options} usingFallback={usingFallback} onField={onField} />
         </div>
       </main>
 
+      <ThresholdPanel results={results} threshold={threshold} onThreshold={setThreshold} />
+      <Importance shotParams={shotParams} />
+
       <footer className="footer">
-        Modellen er en gradient boosting-klassifiserer trent på La Liga-skudd. xG er sannsynligheten for mål.
+        Modellen er en gradient boosting-klassifiserer trent på Barcelonas-Skudd. xG er sannsynligheten for mål.
       </footer>
     </div>
   )

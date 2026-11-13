@@ -3,7 +3,7 @@
 const rows = Array.from({ length: 10 }, (_, r) => r)
 const cols = Array.from({ length: 10 }, (_, c) => c)
 
-export default function Result({ result, status, error }) {
+export default function Result({ result, status, error, threshold, row }) {
   const probability = result ? result.xG_probability : null
   const goals = probability === null ? 0 : Math.round(probability * 100)
   const busy = status === 'loading'
@@ -37,7 +37,15 @@ export default function Result({ result, status, error }) {
           </p>
           {result && (
             <p className="verdict">
-              {result.prediction === 1 ? 'Modellen sier: mål' : 'Modellen sier: ikke mål'}
+              {result.prediction === 1
+                ? `Modellen sier: JA (xG over ${threshold.toFixed(2)})`
+                : `Modellen sier: NEI (xG under ${threshold.toFixed(2)})`}
+            </p>
+          )}
+          {row && (
+            <p className="xg-explain">
+              Med denne terskelen sier modellen JA til {Math.round(row.recall * 100)} av 100 faktiske mål, og{' '}
+              {Math.round(row.precision * 100)} av 100 JA-svar blir faktisk mål.
             </p>
           )}
         </div>
