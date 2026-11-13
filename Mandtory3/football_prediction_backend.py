@@ -122,5 +122,6 @@ api.add_resource(GetOptions, "/options")
 api.add_resource(GetResults, "/results")
 api.add_resource(GetImportance, "/importance")
 
+
 if __name__ == "__main__":
     app.run(debug=False)
