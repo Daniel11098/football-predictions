@@ -2,7 +2,7 @@
 
 En xG-modell (expected goals) som gir sannsynligheten for at et skudd blir mål, servert som REST-API med Flask og brukt i en React-app der du plasserer skudd på banen og ser resultatet med en gang.
 
-![Demo av xG-kalkulatoren](docs/demo.gif)
+![Demo av xG-kalkulatoren](Mandtory3/docs/demo.gif)
 
 ![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python&logoColor=white)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.9.1-F7931E?logo=scikit-learn&logoColor=white)
