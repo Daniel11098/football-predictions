@@ -93,6 +93,25 @@ Navnene på de 31 featurene står i `feature_names` i `football_prediction_backe
 - **Terskelen er et verdivalg.** Ved 0,25 er 64 % av de flaggede skuddene falske alarmer, men modellen fanger 51 % av målene. Brukeren kan flytte terskelen.
 - **Lagsammenligninger er ikke testet.** Testene måler skuddene og ikke om summene treffer på kampresultater.
 
+## Kom i gang med Docker
+
+Med Docker slipper du å installere Python, Node og pakkene selv. Du trenger bare [Docker Desktop](https://www.docker.com/products/docker-desktop/), og den må kjøre.
+
+```bash
+docker compose up --build
+```
+
+Første bygg tar noen minutter. Åpne deretter <http://localhost:8080>.
+
+Kommandoen starter to containere:
+
+| Container | Hva den gjør | Port |
+|---|---|---|
+| `backend` | Flask-API-et med modellen | 5000 |
+| `frontend` | nginx som serverer React-appen og sender `/api` videre til Flask | 8080 |
+
+Stopp med `Ctrl+C`, og rydd opp med `docker compose down`. Neste gang holder det med `docker compose up`. Bruk `--build` igjen hvis du har endret koden, modellen eller `model_results.json`. Port 5000 og 8080 må være ledige.
+
 ## Data
 
 Dataene er basert på hendelsesdata fra StatsBomb. Sjekk StatsBombs vilkår før du deler dataene videre.
